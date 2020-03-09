@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      .grid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 30px;
+      }
+      .panel {
+        border: 1px solid black;
+        width: 30px;
+        height: 30px;
+        margin: 1px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .head {
+        color: red;
+        font-size: 50px;
+      }
+
+      .food {
+        color: purple;
+        font-size: 50px;
+      }
+
+      .body {
+        color: black;
+        font-size: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid"></div>
+
+    <script>
+      // ---------------------------- Draw board ----------------------------
+
+      let grid = document.querySelector(".grid");
+      let col = 20;
+      let row = 20;
+      function displayGrid() {
+        let displayGrid = "";
+        for (let i = 1; i <= col; i++) {
+          displayGrid += `<div data-col="${i}">`;
+          for (let j = 1; j <= row; j++)
+            displayGrid += `<div data-panel="${(i - 1) * 20 +
+              j}" class="panel"></div>`;
+          displayGrid += "</div>";
+        }
+        grid.innerHTML = displayGrid;
+      }
+      displayGrid();
+
+      // ---------------------------- Snake's Direction ----------------------------
+
+      let direction = "ArrowLeft";
+      window.addEventListener("keydown", e => {
+        direction = e.key;
+      });
+
+      // ---------------------------- Snake's movement ----------------------------
+
+      let head = document.querySelector('.panel[data-panel="190"]');
+      let headPanel = parseInt(head.dataset.panel);
+      head.classList.add("head");
+      head.innerHTML = "&bull;";
+
+      let snake = [headPanel, headPanel, headPanel, headPanel];
+
+      function displaySnake() {
+        let head = document.querySelector(`.panel[data-panel="${snake[0]}"]`);
+        head.classList.add("head");
+        head.innerHTML = "&bull;";
+
+        for (let i = 1; i < snake.length; i++) {
+          let dot = document.querySelector(`.panel[data-panel="${snake[i]}"]`);
+          dot.classList.add("body");
+          dot.innerHTML = "&bull;";
+        }
+      }
+
+      function moveSnake() {
+        let oldSnake = [...snake];
+
+        switch (direction) {
+          case "ArrowLeft":
+            headPanel = headPanel - 20 < 0 ? headPanel : headPanel - 20;
+            break;
+          case "ArrowRight":
+            headPanel = headPanel + 20 > 400 ? headPanel : headPanel + 20;
+            break;
+          case "ArrowDown":
+            headPanel = (headPanel + 1) % 20 == 1 ? headPanel : headPanel + 1;
+            break;
+          case "ArrowUp":
+            headPanel = (headPanel - 1) % 20 == 0 ? headPanel : headPanel - 1;
+            break;
+        }
+
+        if (headPanel == food.dataset.panel) {
+          spawnFood();
+          snake.push(headPanel);
+        }
+
+        snake[0] = headPanel;
+        for (var i = 1; i < snake.length; i++) snake[i] = oldSnake[i - 1];
+        let tail =
+          document.querySelector(`.panel[data-panel="${oldSnake[i - 1]}"]`) ||
+          document.querySelector(`.panel[data-panel="${oldSnake[i - 2]}"]`);
+        tail.innerHTML = "";
+        tail.classList.remove("body");
+        tail.classList.remove("head");
+
+        displaySnake();
+      }
+      setInterval(moveSnake, 200);
+
+      // ---------------------------- Spawn food ----------------------------
+
+      let random = Math.floor(Math.random() * 400) + 1;
+      let food = document.querySelector(`.panel[data-panel="${random}"]`);
+      food.classList.add("food");
+      food.innerHTML = "&bull;";
+      function spawnFood() {
+        food.innerHTML = "";
+        food.classList.remove("food");
+        random = Math.floor(Math.random() * 400) + 1;
+        food = document.querySelector(`.panel[data-panel="${random}"]`);
+        food.classList.add("food");
+        food.innerHTML = "&bull;";
+      }
+    </script>
+  </body>
+</html>
