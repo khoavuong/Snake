@@ -44,6 +44,8 @@
     <div class="grid"></div>
 
     <script>
+      let snakeSpeed = 200;
+
       // ---------------------------- Draw board ----------------------------
 
       let grid = document.querySelector(".grid");
@@ -63,16 +65,32 @@
       displayGrid();
 
       // ---------------------------- Snake's Direction ----------------------------
+      function debounce(func, wait = snakeSpeed - 100, immediate = true) {
+        var timeout;
+        return function() {
+          var context = this,
+            args = arguments;
+          var later = function() {
+            timeout = null;
+            if (!immediate) func.apply(context, args);
+          };
+          var callNow = immediate && !timeout;
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+          if (callNow) func.apply(context, args);
+        };
+      }
 
       let direction = "ArrowLeft";
-      window.addEventListener("keydown", e => {
+      function changeDirection(e) {
         if (direction == "ArrowLeft" && e.key == "ArrowRight") return;
         if (direction == "ArrowRight" && e.key == "ArrowLeft") return;
         if (direction == "ArrowDown" && e.key == "ArrowUp") return;
         if (direction == "ArrowUp" && e.key == "ArrowDown") return;
-
         direction = e.key;
-      });
+      }
+
+      window.addEventListener("keydown", debounce(changeDirection));
 
       // ---------------------------- Game mode ----------------------------
 
@@ -93,7 +111,7 @@
       head.classList.add("head");
       head.innerHTML = "&bull;";
 
-      let snake = [headPanel, headPanel, headPanel, headPanel]; // Init length of snake = 4
+      let snake = [headPanel, headPanel, headPanel, headPanel, headPanel]; // Init length of snake = 5
 
       function displaySnake() {
         let head = document.querySelector(`.panel[data-panel="${snake[0]}"]`);
@@ -167,7 +185,7 @@
         displaySnake();
       }
 
-      let game = setInterval(moveSnake, 200);
+      let game = setInterval(moveSnake, snakeSpeed);
 
       // ---------------------------- Spawn food ----------------------------
 
