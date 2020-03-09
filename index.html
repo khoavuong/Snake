@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Snake</title>
 
     <style>
       .grid {
@@ -25,19 +25,20 @@
         color: red;
         font-size: 50px;
       }
-
-      .food {
-        color: purple;
-        font-size: 50px;
-      }
-
       .body {
         color: black;
         font-size: 40px;
       }
+      .food {
+        color: purple;
+        font-size: 50px;
+      }
     </style>
   </head>
   <body>
+    <button class="modeA">Game Mode A</button>
+    <button class="modeB">Game Mode B</button>
+    <div class="gameMode" style="text-align: center;">Game Mode: A</div>
     <div class="grid"></div>
 
     <script>
@@ -49,7 +50,7 @@
       function displayGrid() {
         let displayGrid = "";
         for (let i = 1; i <= col; i++) {
-          displayGrid += `<div data-col="${i}">`;
+          displayGrid += `<div>`;
           for (let j = 1; j <= row; j++)
             displayGrid += `<div data-panel="${(i - 1) * 20 +
               j}" class="panel"></div>`;
@@ -66,6 +67,18 @@
         direction = e.key;
       });
 
+      // ---------------------------- Game mode ----------------------------
+
+      let gameMode = "A";
+      document.querySelector(".modeA").addEventListener("click", () => {
+        gameMode = "A";
+        document.querySelector(".gameMode").innerHTML = "Game Mode: A";
+      });
+      document.querySelector(".modeB").addEventListener("click", () => {
+        gameMode = "B";
+        document.querySelector(".gameMode").innerHTML = "Game Mode: B";
+      });
+
       // ---------------------------- Snake's movement ----------------------------
 
       let head = document.querySelector('.panel[data-panel="190"]');
@@ -73,7 +86,7 @@
       head.classList.add("head");
       head.innerHTML = "&bull;";
 
-      let snake = [headPanel, headPanel, headPanel, headPanel];
+      let snake = [headPanel, headPanel, headPanel, headPanel]; // Init length of snake = 4
 
       function displaySnake() {
         let head = document.querySelector(`.panel[data-panel="${snake[0]}"]`);
@@ -82,6 +95,7 @@
 
         for (let i = 1; i < snake.length; i++) {
           let dot = document.querySelector(`.panel[data-panel="${snake[i]}"]`);
+          dot.classList.remove("head");
           dot.classList.add("body");
           dot.innerHTML = "&bull;";
         }
@@ -92,16 +106,36 @@
 
         switch (direction) {
           case "ArrowLeft":
-            headPanel = headPanel - 20 < 0 ? headPanel : headPanel - 20;
+            headPanel =
+              headPanel - 20 <= 0
+                ? gameMode == "B"
+                  ? headPanel + 380
+                  : headPanel
+                : headPanel - 20;
             break;
           case "ArrowRight":
-            headPanel = headPanel + 20 > 400 ? headPanel : headPanel + 20;
+            headPanel =
+              headPanel + 20 >= 400
+                ? gameMode == "B"
+                  ? headPanel - 380
+                  : headPanel
+                : headPanel + 20;
             break;
           case "ArrowDown":
-            headPanel = (headPanel + 1) % 20 == 1 ? headPanel : headPanel + 1;
+            headPanel =
+              (headPanel + 1) % 20 == 1
+                ? gameMode == "B"
+                  ? headPanel - 19
+                  : headPanel
+                : headPanel + 1;
             break;
           case "ArrowUp":
-            headPanel = (headPanel - 1) % 20 == 0 ? headPanel : headPanel - 1;
+            headPanel =
+              (headPanel - 1) % 20 == 0
+                ? gameMode == "B"
+                  ? headPanel + 19
+                  : headPanel
+                : headPanel - 1;
             break;
         }
 
@@ -121,6 +155,7 @@
 
         displaySnake();
       }
+
       setInterval(moveSnake, 200);
 
       // ---------------------------- Spawn food ----------------------------
@@ -133,6 +168,9 @@
         food.innerHTML = "";
         food.classList.remove("food");
         random = Math.floor(Math.random() * 400) + 1;
+        while (snake.some(panel => panel == random))
+          random = Math.floor(Math.random() * 400) + 1;
+
         food = document.querySelector(`.panel[data-panel="${random}"]`);
         food.classList.add("food");
         food.innerHTML = "&bull;";
